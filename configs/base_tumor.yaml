@@ -1,0 +1,59 @@
+---
+
+num_workers: 0
+experiment_name: "training"
+data_path: "dataset/LiTS"
+iw: True # Use inverse frequency weighting by default
+
+model:
+  type: models.Unet3D
+  in_channels: 1
+  out_channels: 1
+
+classifier:
+  type: models.resnet3D10
+  n_input_channels: 2
+  n_classes: 1
+
+loss:
+  type: losses.iwFocalLoss
+  alpha: 0.75
+
+optimizer:
+  type: torch.optim.Adam
+  lr: 0.0001 # TODO: Test with 0.0001 also
+
+# optimizer:
+#   type: torch.optim.SGD
+#   lr: 0.01
+#   momentum: 0.9
+#   nesterov: True
+#   weight_decay: 0
+
+
+scheduler:
+  type: torch.optim.lr_scheduler.MultiStepLR
+  milestones: [50, 80]
+  gamma: 0.2
+
+callbacks:
+  checkpoint_callback:
+    type: pytorch_lightning.callbacks.ModelCheckpoint
+    dirpath: "./model_logs/KDDW"
+    monitor: train/iou
+    verbose: False
+    mode: max
+    save_top_k: 1
+
+patch_size: 32
+
+train_parameters:
+  epochs: 100
+  batch_size: 8
+
+val_parameters:
+  batch_size: 8
+
+test_parameters:
+  batch_size: 8
+  threshold: .4

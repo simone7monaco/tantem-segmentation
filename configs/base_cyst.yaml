@@ -1,0 +1,63 @@
+---
+
+num_workers: 0
+experiment_name: "training"
+data_path: "dataset/ADPKD"
+val_split: 0.2
+iw: True # Use inverse frequency weighting by default
+
+model:
+  type: segmentation_models_pytorch.UnetPlusPlus
+  encoder_name: resnet50
+  classes: 1
+  encoder_weights: imagenet
+
+classifier:
+  type: models.resnet2D18
+  n_input_channels: 4
+  n_classes: 1
+
+loss:
+  type: losses.ComboLoss
+  losses: [bce, jaccard]
+  weights: [1, 1]
+
+optimizer:
+  type: torch.optim.Adam
+  lr: 0.0001
+
+scheduler:
+  type: torch.optim.lr_scheduler.CosineAnnealingWarmRestarts
+  T_0: 10
+  T_mult: 2
+
+callbacks:
+  checkpoint_callback:
+    type: pytorch_lightning.callbacks.ModelCheckpoint
+    dirpath: "./model_logs/KDDW"
+    monitor: val/iou
+    verbose: False
+    mode: max
+    save_top_k: 1
+  
+  earlystopping_callback:
+    type: pytorch_lightning.callbacks.EarlyStopping
+    monitor: val/iou
+    min_delta: 0.005
+    patience: 10
+    verbose: False
+    mode: max
+
+noG_preprocessing: True
+patch_size: 128
+
+train_parameters:
+  epochs: 100
+  batch_size: 8
+
+val_parameters:
+  batch_size: 8
+
+test_parameters:
+  batch_size: 8
+  threshold: .4

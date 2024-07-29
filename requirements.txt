@@ -1,0 +1,16 @@
+easydict
+numpy
+opencv-python
+nibabel
+pillow
+pandas
+scikit-learn
+scipy
+matplotlib
+seaborn
+pytorch_lightning>=2.0.0
+pytorch_toolbelt
+segmentation_models_pytorch
+deep-pipe
+albumentations
+wandb
